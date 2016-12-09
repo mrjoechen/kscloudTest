@@ -19,7 +19,12 @@ public class Constants {
 //	public static final String ACCESS_KEY_SECRET = "CVpFTtt+tMlxwkg1PtzmD9p1rxHxAu0enzNBbk3F";
 	
 	//"73OBWSCOKC5CJVXQG73A", "X2MJIHrX3zjoQ2QO4ZOuhmU5mGk9dEJGqeb1e2D+"
-	public static final String ACCESS_KEY__ID = "73OBWSCOKC5CJVXQG73A";
-	public static final String ACCESS_KEY_SECRET = "X2MJIHrX3zjoQ2QO4ZOuhmU5mGk9dEJGqeb1e2D+";
+
+//			'AK':'T7l3oEkEcmpk4Z5rKBiv'
+//			'SK':'vAdSzvuWdFje/EDKqNHiQ/qM3oBjz3EPT+5du81t'
+	public static final String ACCESS_KEY__ID = "T7l3oEkEcmpk4Z5rKBiv";
+	public static final String ACCESS_KEY_SECRET = "vAdSzvuWdFje/EDKqNHiQ/qM3oBjz3EPT+5du81t";
+//	public static final String ACCESS_KEY__ID = "73OBWSCOKC5CJVXQG73A";
+//	public static final String ACCESS_KEY_SECRET = "X2MJIHrX3zjoQ2QO4ZOuhmU5mGk9dEJGqeb1e2D+";
 	public static final long MULTI_UPLOAD_THREADHOLD = 16 * 1024 * 1024;
 }

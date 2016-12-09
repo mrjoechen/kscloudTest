@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import com.ksyun.ks3.exception.Ks3Error;
 import com.ksyun.ks3.model.PartETag;
+import com.ksyun.ks3.model.acl.CannedAccessControlList;
 import com.ksyun.ks3.model.result.CompleteMultipartUploadResult;
 import com.ksyun.ks3.model.result.InitiateMultipartUploadResult;
 import com.ksyun.ks3.model.result.ListPartsResult;
@@ -67,204 +68,6 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 	private BucketInpuDialog bucketInpuDialog;
 	private String mBucketName;
 
-	class ViewHolder {
-		ImageView fileIcon;
-		TextView fileNameTextView;
-		LinearLayout fileSummaryLayout;
-		TextView fileSizeTextView;
-		TextView fileModiyTextView;
-		LinearLayout uploadSummaryLayout;
-		ProgressBar uploadProgressBar;
-		TextView progressTextView;
-		ImageView uploadBtn;
-	}
-
-	class FileAdapter extends BaseAdapter {
-		private List<UploadFile> mUploadFiles;
-		private LayoutInflater mInflater;
-
-		FileAdapter(Context context, List<UploadFile> uploadFiles) {
-			this.mUploadFiles = new ArrayList<UploadFile>();
-			if (uploadFiles != null)
-				this.mUploadFiles.addAll(uploadFiles);
-			this.mInflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		}
-
-		@Override
-		public int getCount() {
-			return mUploadFiles.size();
-		}
-
-		@Override
-		public UploadFile getItem(int position) {
-			return this.mUploadFiles.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder viewHolder;
-			if (convertView == null) {
-				convertView = mInflater.inflate(R.layout.upload_list_item,
-						parent, false);
-				viewHolder = new ViewHolder();
-				viewHolder.fileIcon = (ImageView) convertView
-						.findViewById(R.id.file_icon);
-				viewHolder.fileNameTextView = (TextView) convertView
-						.findViewById(R.id.file_name);
-				viewHolder.fileSummaryLayout = (LinearLayout) convertView
-						.findViewById(R.id.file_summary_layout);
-				viewHolder.fileSizeTextView = (TextView) convertView
-						.findViewById(R.id.file_size);
-				viewHolder.fileModiyTextView = (TextView) convertView
-						.findViewById(R.id.file_last_modiy);
-				viewHolder.uploadSummaryLayout = (LinearLayout) convertView
-						.findViewById(R.id.progress_summary_layout);
-				viewHolder.uploadProgressBar = (ProgressBar) convertView
-						.findViewById(R.id.upload_progress_bar);
-				viewHolder.progressTextView = (TextView) convertView
-						.findViewById(R.id.upload_progress_txt);
-				viewHolder.uploadBtn = (ImageView) convertView
-						.findViewById(R.id.upload_btn);
-				convertView.setTag(viewHolder);
-			} else {
-				viewHolder = (ViewHolder) convertView.getTag();
-			}
-			viewHolder.fileIcon
-					.setImageDrawable(mUploadFiles.get(position).icon);
-			viewHolder.fileNameTextView.setText(mUploadFiles.get(position).file
-					.getName());
-
-			if (!mUploadFiles.get(position).file.isDirectory()) {
-				viewHolder.fileSizeTextView.setVisibility(View.VISIBLE);
-				long size = mUploadFiles.get(position).file.length();
-				String sizeStr = "unkown-size";
-
-				if (size >= 1024 * 1024) {
-					sizeStr = ((int) (size / 1024 / 1024) * 100) / 100 + "MB";
-				} else {
-					sizeStr = (mUploadFiles.get(position).file.length() / 1024)
-							+ "kb";
-				}
-				viewHolder.fileSizeTextView.setText(sizeStr);
-				String modiyStr = DemoUtils.formatDate(mUploadFiles
-						.get(position).file.lastModified());
-				viewHolder.fileModiyTextView.setText(modiyStr);
-				if (mUploadFiles.get(position).status > UploadFile.STATUS_NOT_START) {
-					viewHolder.uploadSummaryLayout.setVisibility(View.VISIBLE);
-					viewHolder.uploadProgressBar.setProgress(mUploadFiles
-							.get(position).progress);
-					viewHolder.fileSummaryLayout.setVisibility(View.GONE);
-					viewHolder.uploadBtn.setVisibility(View.GONE);
-					switch (mUploadFiles.get(position).status) {
-					case UploadFile.STATUS_STARTED:
-						viewHolder.progressTextView.setText("准备上传");
-						break;
-					case UploadFile.STATUS_INIT:
-						viewHolder.progressTextView.setText("初始化完成");
-						break;
-					case UploadFile.STATUS_UPLOADPART:
-						viewHolder.progressTextView.setText("分块上传.."
-								+ mUploadFiles.get(position).progress + "%");
-						break;
-					case UploadFile.STATUS_LISTING:
-						viewHolder.progressTextView.setText("获取上传的快..");
-						break;
-					case UploadFile.STATUS_COMPLETE:
-						viewHolder.progressTextView.setText("合并完成");
-						break;
-					case UploadFile.STATUS_UPLOADING:
-						viewHolder.progressTextView.setText(mUploadFiles
-								.get(position).progress + "%");
-						break;
-					case UploadFile.STATUS_FINISH:
-						viewHolder.progressTextView.setText("完成上传");
-						break;
-					case UploadFile.STATUS_FAIL:
-						viewHolder.progressTextView.setText("上传失败");
-						break;
-
-					case UploadFile.STATUS_INIT_FAIL:
-						viewHolder.progressTextView.setText("上传失败");
-						break;
-					case UploadFile.STATUS_UPLOADPART_FAIL:
-						viewHolder.progressTextView.setText("分块上传失败");
-						break;
-					case UploadFile.STATUS_LISTING_FAIL:
-						viewHolder.progressTextView.setText("获取块失败");
-						break;
-					case UploadFile.STATUS_COMPLETE_FAIL:
-						viewHolder.progressTextView.setText("文件合并失败");
-						break;
-					}
-				} else {
-					viewHolder.fileSummaryLayout.setVisibility(View.VISIBLE);
-					viewHolder.uploadBtn.setVisibility(View.VISIBLE);
-					viewHolder.uploadSummaryLayout.setVisibility(View.GONE);
-				}
-			} else {
-				viewHolder.fileSummaryLayout.setVisibility(View.GONE);
-				viewHolder.uploadSummaryLayout.setVisibility(View.GONE);
-				viewHolder.uploadBtn.setVisibility(View.GONE);
-			}
-
-			return convertView;
-		}
-
-		public void fillDatas() {
-			this.mUploadFiles.clear();
-			this.mUploadFiles.addAll(dataSource.get(currentDir.getPath()));
-			this.notifyDataSetChanged();
-		}
-
-		public void updateCurrent() {
-			this.notifyDataSetChanged();
-		}
-	}
-
-	class UploadFile implements Serializable {
-		private static final long serialVersionUID = 1L;
-		static final int STATUS_NOT_START = 0;
-		static final int STATUS_STARTED = 1;
-		static final int STATUS_UPLOADING = 2;
-		static final int STATUS_INIT = 3;
-		static final int STATUS_UPLOADPART = 4;
-		static final int STATUS_LISTING = 5;
-		static final int STATUS_COMPLETE = 6;
-		static final int STATUS_FINISH = 7;
-		static final int STATUS_FAIL = 8;
-		static final int STATUS_INIT_FAIL = 9;
-		static final int STATUS_UPLOADPART_FAIL = 10;
-		static final int STATUS_LISTING_FAIL = 11;
-		static final int STATUS_COMPLETE_FAIL = 12;
-		Drawable icon;
-		File file;
-		int progress;
-		int status;
-
-		@Override
-		public String toString() {
-			return file.getName() + ",upload?" + status + ",progress:"
-					+ progress;
-		}
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_upload);
-		listView = (ListView) findViewById(R.id.files);
-		currentDirTextView = (TextView) findViewById(R.id.current_dir_tv);
-		currentDir = Environment.getExternalStorageDirectory();
-		setUp();
-
-	}
-
 	private void setUp() {
 		// 初始化Ks3Client
 		configuration = Ks3ClientConfiguration.getDefaultConfiguration();
@@ -273,8 +76,8 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 		//如果用户需要通过自己的域名上传，可以将Endpoint设置成自己域名
 		//configuration.setDomainMode(true);
 		//client.setEndpoint("***.***.****");
-	
-		client.setEndpoint("ks3-cn-shanghai.ksyun.com");
+		client.setEndpoint("ks3-cn-beijing.ksyun.com");
+//		client.setEndpoint("ks3-cn-shanghai.ksyun.com");
 		client.setConfiguration(configuration);
 
 		// AuthListener方式初始化
@@ -333,6 +136,20 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 		bucketInpuDialog.show();
 		client.setConfiguration(configuration);
 	}
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_upload);
+		listView = (ListView) findViewById(R.id.files);
+		currentDirTextView = (TextView) findViewById(R.id.current_dir_tv);
+		currentDir = Environment.getExternalStorageDirectory();
+		setUp();
+
+	}
+
+
 
 	private void switchDir(File dir) {
 		if (dir == null || !dir.exists() || dir.isFile())
@@ -412,6 +229,11 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 //		customParams.put("kss-location", "user_input_location");
 //		customParams.put("kss-name", "user_input_name");
 //		request.setCallBack("http://127.0.0.1:19091/kss/call_back", "objectKey=${key}&etag=${etag}&location=${kss-location}&name=${kss-name}", customParams);
+
+
+		//设置公共
+		request.setCannedAcl(CannedAccessControlList.PublicRead);
+
 		client.putObject(request, new PutObjectResponseHandler() {
 
 			@Override
@@ -503,6 +325,7 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 			final UploadFile item) {
 		InitiateMultipartUploadRequest request = new InitiateMultipartUploadRequest(
 				bucketName, item.file.getName());
+		request.setCannedAcl(CannedAccessControlList.PublicRead);
 		initiateMultipartUpload(request, item);
 	}
 
@@ -753,6 +576,195 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 			default:
 				break;
 			}
+		}
+	}
+
+
+
+	class ViewHolder {
+		ImageView fileIcon;
+		TextView fileNameTextView;
+		LinearLayout fileSummaryLayout;
+		TextView fileSizeTextView;
+		TextView fileModiyTextView;
+		LinearLayout uploadSummaryLayout;
+		ProgressBar uploadProgressBar;
+		TextView progressTextView;
+		ImageView uploadBtn;
+	}
+
+	class FileAdapter extends BaseAdapter {
+		private List<UploadFile> mUploadFiles;
+		private LayoutInflater mInflater;
+
+		FileAdapter(Context context, List<UploadFile> uploadFiles) {
+			this.mUploadFiles = new ArrayList<UploadFile>();
+			if (uploadFiles != null)
+				this.mUploadFiles.addAll(uploadFiles);
+			this.mInflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		}
+
+		@Override
+		public int getCount() {
+			return mUploadFiles.size();
+		}
+
+		@Override
+		public UploadFile getItem(int position) {
+			return this.mUploadFiles.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder viewHolder;
+			if (convertView == null) {
+				convertView = mInflater.inflate(R.layout.upload_list_item,
+						parent, false);
+				viewHolder = new ViewHolder();
+				viewHolder.fileIcon = (ImageView) convertView
+						.findViewById(R.id.file_icon);
+				viewHolder.fileNameTextView = (TextView) convertView
+						.findViewById(R.id.file_name);
+				viewHolder.fileSummaryLayout = (LinearLayout) convertView
+						.findViewById(R.id.file_summary_layout);
+				viewHolder.fileSizeTextView = (TextView) convertView
+						.findViewById(R.id.file_size);
+				viewHolder.fileModiyTextView = (TextView) convertView
+						.findViewById(R.id.file_last_modiy);
+				viewHolder.uploadSummaryLayout = (LinearLayout) convertView
+						.findViewById(R.id.progress_summary_layout);
+				viewHolder.uploadProgressBar = (ProgressBar) convertView
+						.findViewById(R.id.upload_progress_bar);
+				viewHolder.progressTextView = (TextView) convertView
+						.findViewById(R.id.upload_progress_txt);
+				viewHolder.uploadBtn = (ImageView) convertView
+						.findViewById(R.id.upload_btn);
+				convertView.setTag(viewHolder);
+			} else {
+				viewHolder = (ViewHolder) convertView.getTag();
+			}
+			viewHolder.fileIcon
+					.setImageDrawable(mUploadFiles.get(position).icon);
+			viewHolder.fileNameTextView.setText(mUploadFiles.get(position).file
+					.getName());
+
+			if (!mUploadFiles.get(position).file.isDirectory()) {
+				viewHolder.fileSizeTextView.setVisibility(View.VISIBLE);
+				long size = mUploadFiles.get(position).file.length();
+				String sizeStr = "unkown-size";
+
+				if (size >= 1024 * 1024) {
+					sizeStr = ((int) (size / 1024 / 1024) * 100) / 100 + "MB";
+				} else {
+					sizeStr = (mUploadFiles.get(position).file.length() / 1024)
+							+ "kb";
+				}
+				viewHolder.fileSizeTextView.setText(sizeStr);
+				String modiyStr = DemoUtils.formatDate(mUploadFiles
+						.get(position).file.lastModified());
+				viewHolder.fileModiyTextView.setText(modiyStr);
+				if (mUploadFiles.get(position).status > UploadFile.STATUS_NOT_START) {
+					viewHolder.uploadSummaryLayout.setVisibility(View.VISIBLE);
+					viewHolder.uploadProgressBar.setProgress(mUploadFiles
+							.get(position).progress);
+					viewHolder.fileSummaryLayout.setVisibility(View.GONE);
+					viewHolder.uploadBtn.setVisibility(View.GONE);
+					switch (mUploadFiles.get(position).status) {
+						case UploadFile.STATUS_STARTED:
+							viewHolder.progressTextView.setText("准备上传");
+							break;
+						case UploadFile.STATUS_INIT:
+							viewHolder.progressTextView.setText("初始化完成");
+							break;
+						case UploadFile.STATUS_UPLOADPART:
+							viewHolder.progressTextView.setText("分块上传.."
+									+ mUploadFiles.get(position).progress + "%");
+							break;
+						case UploadFile.STATUS_LISTING:
+							viewHolder.progressTextView.setText("获取上传的快..");
+							break;
+						case UploadFile.STATUS_COMPLETE:
+							viewHolder.progressTextView.setText("合并完成");
+							break;
+						case UploadFile.STATUS_UPLOADING:
+							viewHolder.progressTextView.setText(mUploadFiles
+									.get(position).progress + "%");
+							break;
+						case UploadFile.STATUS_FINISH:
+							viewHolder.progressTextView.setText("完成上传");
+							break;
+						case UploadFile.STATUS_FAIL:
+							viewHolder.progressTextView.setText("上传失败");
+							break;
+
+						case UploadFile.STATUS_INIT_FAIL:
+							viewHolder.progressTextView.setText("上传失败");
+							break;
+						case UploadFile.STATUS_UPLOADPART_FAIL:
+							viewHolder.progressTextView.setText("分块上传失败");
+							break;
+						case UploadFile.STATUS_LISTING_FAIL:
+							viewHolder.progressTextView.setText("获取块失败");
+							break;
+						case UploadFile.STATUS_COMPLETE_FAIL:
+							viewHolder.progressTextView.setText("文件合并失败");
+							break;
+					}
+				} else {
+					viewHolder.fileSummaryLayout.setVisibility(View.VISIBLE);
+					viewHolder.uploadBtn.setVisibility(View.VISIBLE);
+					viewHolder.uploadSummaryLayout.setVisibility(View.GONE);
+				}
+			} else {
+				viewHolder.fileSummaryLayout.setVisibility(View.GONE);
+				viewHolder.uploadSummaryLayout.setVisibility(View.GONE);
+				viewHolder.uploadBtn.setVisibility(View.GONE);
+			}
+
+			return convertView;
+		}
+
+		public void fillDatas() {
+			this.mUploadFiles.clear();
+			this.mUploadFiles.addAll(dataSource.get(currentDir.getPath()));
+			this.notifyDataSetChanged();
+		}
+
+		public void updateCurrent() {
+			this.notifyDataSetChanged();
+		}
+	}
+
+	class UploadFile implements Serializable {
+		private static final long serialVersionUID = 1L;
+		static final int STATUS_NOT_START = 0;
+		static final int STATUS_STARTED = 1;
+		static final int STATUS_UPLOADING = 2;
+		static final int STATUS_INIT = 3;
+		static final int STATUS_UPLOADPART = 4;
+		static final int STATUS_LISTING = 5;
+		static final int STATUS_COMPLETE = 6;
+		static final int STATUS_FINISH = 7;
+		static final int STATUS_FAIL = 8;
+		static final int STATUS_INIT_FAIL = 9;
+		static final int STATUS_UPLOADPART_FAIL = 10;
+		static final int STATUS_LISTING_FAIL = 11;
+		static final int STATUS_COMPLETE_FAIL = 12;
+		Drawable icon;
+		File file;
+		int progress;
+		int status;
+
+		@Override
+		public String toString() {
+			return file.getName() + ",upload?" + status + ",progress:"
+					+ progress;
 		}
 	}
 }

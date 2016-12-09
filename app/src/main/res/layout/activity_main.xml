@@ -28,5 +28,12 @@
         android:layout_height="wrap_content"
         android:text="download"/>
 
+    <Button
+        android:id="@+id/tv_getobjacl"
+        android:layout_margin="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GET_OBJ_ACL"/>
+
 
 </LinearLayout>

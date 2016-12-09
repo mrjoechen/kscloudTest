@@ -27,9 +27,10 @@ public class Ks3ClientHelper {
 
 	//初始化
 	public static void Init(Context context) {
-		client = new Ks3Client("73OBWSCOKC5CJVXQG73A", "X2MJIHrX3zjoQ2QO4ZOuhmU5mGk9dEJGqeb1e2D+",
+		client = new Ks3Client(Constants.ACCESS_KEY__ID, Constants.ACCESS_KEY_SECRET,
 				context);
 		_context = context;
+		client.setEndpoint("ks3-cn-beijing.ksyun.com");
 		configuration = Ks3ClientConfiguration.getDefaultConfiguration();
 		client.setConfiguration(configuration);
 	}

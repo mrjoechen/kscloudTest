@@ -21,7 +21,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".UploadActivity" />
-        <activity android:name=".DownloadActivity"></activity>
+        <activity android:name=".DownloadActivity" />
+        <activity android:name=".GetObjectAclActivity"/>
+        <activity android:name=".RESTAPITestResult"/>
     </application>
 
 </manifest>

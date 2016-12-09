@@ -3,19 +3,37 @@ package com.thunder.kscloudtest;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
 import org.apache.http.Header;
+
+import com.ksyun.ks3.exception.Ks3Error;
+import com.ksyun.ks3.model.result.GetObjectResult;
 import com.ksyun.ks3.services.Ks3Client;
 import com.ksyun.ks3.services.Ks3ClientConfiguration;
 import com.ksyun.ks3.services.request.GetObjectRequest;
+import com.ksyun.ks3.services.handler.GetObjectResponseHandler;
+import com.ksyun.ks3.services.request.Ks3HttpRequest;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import static com.thunder.kscloudtest.Ks3ClientHelper.client;
 
 public class DownloadActivity extends AppCompatActivity {
-
+    private File storeForder;
 
     private Ks3ClientConfiguration configuration;
+    private File file;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,25 +46,52 @@ public class DownloadActivity extends AppCompatActivity {
         //如果用户需要通过自己的域名上传，可以将Endpoint设置成自己域名
         //configuration.setDomainMode(true);
         //client.setEndpoint("***.***.****");
-
-        client.setEndpoint("ks3-cn-shanghai.ksyun.com");
+        prepareStoreForder();
+        client.setEndpoint("ks3-cn-beijing.ksyun.com");
+//        client.setEndpoint("ks3-cn-shanghai.ksyun.com");
         client.setConfiguration(configuration);
 
-//        client.getObject(DummyActivity.this,Constants.BucketName,Constants.ObjectKey,
-//                new GetObjectResponceHandler(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),Constants.ObjectKey), Constants.BucketName,Constants.ObjectKey) {
+
+        String bucketName = "lsandroid";
+        String objectKey = "1.jpg";
+
+//        String bucketName = "app123";
+//        String objectKey = "1.jpg";
+
+
+        DownloadObj(bucketName, objectKey, "test.jpg");
+
+//        final GetObjectRequest request = new GetObjectRequest(bucketName, objectKey);
+
+//        client.getObject(DownloadActivity.this,"publish","ceshi.png",
+//        client.getObject(request,
+//                new GetObjectResponseHandler(file, bucketName, objectKey) {
 //
-//                    @Override
-//                    public void onTaskSuccess(int statesCode, Header[] responceHeaders) {
-//                    }
-//
-//                    @Override
-//                    public void onTaskFailure(int statesCode, Header[] responceHeaders,
-//                                              String response, Throwable throwable) {
-//                    }
 //
 //                    @Override
 //                    public  void onTaskFinish(){
 //
+//                    }
+//
+//                    @Override
+//                    public void onTaskCancel() {
+//
+//                    }
+//
+//                    @Override
+//                    public void onTaskSuccess(int i, Header[] headers, GetObjectResult getObjectResult) {
+//                        Log.i("KSYun", "state code : " + i);
+//                        Log.i("KSYun", getObjectResult.getObject().getFile().getPath());
+//                        Log.i("KSYun", "" + getObjectResult.getObject().getFile().length());
+//                        Toast.makeText(DownloadActivity.this,"下载成功"+Environment.getExternalStorageDirectory(),Toast.LENGTH_LONG).show();
+//                    }
+//
+//                    @Override
+//                    public void onTaskFailure(int i, Ks3Error ks3Error, Header[] headers, Throwable throwable, File file) {
+//                        Log.i("KSYun", "state code : " + i);
+//                        Toast.makeText(DownloadActivity.this,"下载失败",Toast.LENGTH_LONG).show();
+//
+//                        Toast.makeText(DownloadActivity.this,throwable.getMessage(),Toast.LENGTH_LONG).show();
 //                    }
 //
 //                    @Override
@@ -58,6 +103,8 @@ public class DownloadActivity extends AppCompatActivity {
 //                    public void onTaskProgress(double progress){
 //                        //运行在非UI线程，更新UI时需要注意
 //                        //Progress为0-100之间的double类型数值
+//
+//                        Log.i("KSYun","progress :"+progress);
 //                    }
 //                }
 //        );
@@ -168,5 +215,113 @@ public class DownloadActivity extends AppCompatActivity {
 //        });
     }
 
+    //下载文件
+    public void DownloadObj(String bucketName, String objectKey, String fileName) {
 
+
+        file = new File(storeForder, fileName);
+        Ks3HttpRequest result = client.getObject(DownloadActivity.this, bucketName, objectKey,
+                new GetObjectResponseHandler(file, bucketName,
+                        objectKey) {
+
+                    @Override
+                    public void onTaskSuccess(int arg0, Header[] arg1,
+                                              GetObjectResult arg2) {
+                        // TODO Auto-generated method stub
+                        Toast.makeText(DownloadActivity.this, "success", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onTaskFailure(int i, Ks3Error ks3Error, Header[] headers, Throwable throwable, File file) {
+
+                    }
+
+                    @Override
+                    public void onTaskStart() {
+                        // TODO Auto-generated method stub
+                        Toast.makeText(DownloadActivity.this, "Download begin", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onTaskProgress(double arg0) {
+                        // TODO Auto-generated method stub
+                        Log.i("KSYun", "progress :" + arg0);
+
+                    }
+
+                    @Override
+                    public void onTaskFinish() {
+                        // TODO Auto-generated method stub
+                        Toast.makeText(DownloadActivity.this, "finish!", Toast.LENGTH_SHORT).show();
+                        DownloadActivity.this.finish();
+                    }
+
+
+                    @Override
+                    public void onTaskCancel() {
+                        // TODO Auto-generated method stub
+
+                    }
+                }
+        );
+
+
+        Log.i("KSYun-URL",result.getUrl());
+        //创建异步的httpclient对象AsyncHttpClient
+        AsyncHttpClient ahc = new AsyncHttpClient();
+        //发送get请求
+        ahc.get(result.getUrl(), new MyHandler());
+
+
+
+
+
+
+
+//        GetObjectResult result = client.getObject(request);
+//
+//        Ks3Object object = result.getObject();
+//        //获取object的元数据
+//        ObjectMetadata meta = object.getObjectMetadata();
+//        //当分块下载时获取文件的实际大小，而非当前小块的大小
+//        Long length = meta.getInstanceLength();
+//        //获取object的输入流
+//        object.getObjectContent();
+
+    }
+
+
+    class MyHandler extends AsyncHttpResponseHandler {
+        //http请求成功，返回码为200，系统回调此方法
+        @Override
+        //responseBody的内容就是服务器返回的数据
+        public void onSuccess(int statusCode, Header[] headers,byte[] responseBody) {
+
+
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(file);
+                fos.write(responseBody);
+
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        //http请求失败，返回码不为200，系统回调此方法
+        @Override
+        public void onFailure(int statusCode, Header[] headers,byte[] responseBody, Throwable error) {
+            Toast.makeText(DownloadActivity.this, "ERROR", Toast.LENGTH_LONG).show();
+        }
+    }
+    private void prepareStoreForder() {
+        storeForder = new File(Environment.getExternalStorageDirectory(),
+                "ksyun_download");
+        if (!storeForder.exists()) {
+            storeForder.mkdirs();
+        } else if (storeForder.isFile()) {
+            storeForder.delete();
+        }
+    }
 }

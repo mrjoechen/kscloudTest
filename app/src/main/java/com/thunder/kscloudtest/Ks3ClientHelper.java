@@ -113,31 +113,31 @@ public class Ks3ClientHelper {
 				});
 	}
 
-//	// 分快上传
-//	private void doMultipartUpload(final String bucketName,
-//								   final UploadFile item) {
-//
-//		handler = new UploadPartHandler();
-//		client.initiateMultipartUpload(new InitiateMultipartUploadRequest(
-//						bucketName, objectKey),
-//				new InitiateMultipartUploadResponceHandler() {
-//
-//					@Override
-//					public void onFailure(int i, Ks3Error ks3Error, Header[] headers, String s, Throwable throwable) {
-//
-//					}
-//
-//					@Override
-//					public void onSuccess(int statesCode,
-//										  Header[] responceHeaders,
-//										  InitiateMultipartUploadResult result) {
-//						String uploadId = result.getUploadId();
-//						handler.sendEmptyMessage(1);
-//
-//
-//					}
-//				});
-//		}
+	// 分快上传
+	private void doMultipartUpload( String bucketName,
+								   String fileName) {
+
+		handler = new UploadPartHandler();
+		client.initiateMultipartUpload(new InitiateMultipartUploadRequest(
+						bucketName, fileName),
+				new InitiateMultipartUploadResponceHandler() {
+
+					@Override
+					public void onFailure(int i, Ks3Error ks3Error, Header[] headers, String s, Throwable throwable) {
+
+					}
+
+					@Override
+					public void onSuccess(int statesCode,
+										  Header[] responceHeaders,
+										  InitiateMultipartUploadResult result) {
+						String uploadId = result.getUploadId();
+						handler.sendEmptyMessage(1);
+
+
+					}
+				});
+		}
 
 
 	class UploadPartHandler extends Handler{
@@ -148,6 +148,7 @@ public class Ks3ClientHelper {
 
 			switch (msg.what){
 				case 0:
+
 					break;
 				case 1:
 					break;

@@ -253,6 +253,9 @@ public class UploadActivity extends Activity implements OnItemClickListener {
 					}
 				}
 				mHandler.sendEmptyMessage(UPDATE_SINGLE_UPLOAD_STATUS);
+
+				Log.i("KSYun",progress+"");
+
 			}
 
 			@Override

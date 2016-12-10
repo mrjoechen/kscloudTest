@@ -35,5 +35,10 @@
         android:layout_height="wrap_content"
         android:text="GET_OBJ_ACL"/>
 
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 
 </LinearLayout>

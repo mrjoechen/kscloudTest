@@ -1,14 +1,17 @@
 package com.thunder.kscloudtest;
 
 import android.os.Environment;
+import android.os.StatFs;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import org.apache.http.Header;
+import org.apache.http.HttpConnection;
 
 import com.ksyun.ks3.exception.Ks3Error;
+import com.ksyun.ks3.model.Ks3Object;
 import com.ksyun.ks3.model.result.GetObjectResult;
 import com.ksyun.ks3.services.Ks3Client;
 import com.ksyun.ks3.services.Ks3ClientConfiguration;
@@ -18,13 +21,19 @@ import com.ksyun.ks3.services.request.Ks3HttpRequest;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.thunder.kscloudtest.Ks3ClientHelper.client;
 
@@ -53,7 +62,7 @@ public class DownloadActivity extends AppCompatActivity {
 
 
         String bucketName = "lsandroid";
-        String objectKey = "1.jpg";
+        String objectKey = "test/1.jpg";
 
 //        String bucketName = "app123";
 //        String objectKey = "1.jpg";
@@ -220,7 +229,55 @@ public class DownloadActivity extends AppCompatActivity {
 
 
         file = new File(storeForder, fileName);
-        Ks3HttpRequest result = client.getObject(DownloadActivity.this, bucketName, objectKey,
+
+
+
+//        GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, objectKey);
+//
+//        client.getObject(getObjectRequest, new GetObjectResponseHandler(file, bucketName,
+//                objectKey) {
+//
+//            @Override
+//            public void onTaskSuccess(int arg0, Header[] arg1,
+//                                      GetObjectResult arg2) {
+//                // TODO Auto-generated method stub
+//                Toast.makeText(DownloadActivity.this, "success", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onTaskFailure(int i, Ks3Error ks3Error, Header[] headers, Throwable throwable, File file) {
+//
+//            }
+//
+//            @Override
+//            public void onTaskStart() {
+//                // TODO Auto-generated method stub
+//                Toast.makeText(DownloadActivity.this, "Download begin", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onTaskProgress(double arg0) {
+//                // TODO Auto-generated method stub
+//                Log.i("KSYun", "progress :" + arg0);
+//
+//            }
+//
+//            @Override
+//            public void onTaskFinish() {
+//                // TODO Auto-generated method stub
+//                Toast.makeText(DownloadActivity.this, "finish!", Toast.LENGTH_SHORT).show();
+//                DownloadActivity.this.finish();
+//            }
+//
+//
+//            @Override
+//            public void onTaskCancel() {
+//                // TODO Auto-generated method stub
+//
+//            }
+//        });
+
+        client.getObject(DownloadActivity.this, bucketName, objectKey,
                 new GetObjectResponseHandler(file, bucketName,
                         objectKey) {
 
@@ -229,6 +286,8 @@ public class DownloadActivity extends AppCompatActivity {
                                               GetObjectResult arg2) {
                         // TODO Auto-generated method stub
                         Toast.makeText(DownloadActivity.this, "success", Toast.LENGTH_SHORT).show();
+
+
                     }
 
                     @Override
@@ -266,15 +325,13 @@ public class DownloadActivity extends AppCompatActivity {
         );
 
 
-        Log.i("KSYun-URL",result.getUrl());
-        //创建异步的httpclient对象AsyncHttpClient
-        AsyncHttpClient ahc = new AsyncHttpClient();
-        //发送get请求
-        ahc.get(result.getUrl(), new MyHandler());
 
-
-
-
+//        String url = result.getUrl();
+//        Log.i("KSYun-URL",url);
+//        //创建异步的httpclient对象AsyncHttpClient
+//        AsyncHttpClient ahc = new AsyncHttpClient();
+//        //发送get请求
+//        ahc.get(url, new MyHandler());
 
 
 
@@ -309,19 +366,124 @@ public class DownloadActivity extends AppCompatActivity {
             }
 
         }
-        //http请求失败，返回码不为200，系统回调此方法
+
         @Override
         public void onFailure(int statusCode, Header[] headers,byte[] responseBody, Throwable error) {
+            Log.i("=====","==========");
+            error.printStackTrace();
             Toast.makeText(DownloadActivity.this, "ERROR", Toast.LENGTH_LONG).show();
+            Log.i("=====","==========");
+
         }
     }
     private void prepareStoreForder() {
-        storeForder = new File(Environment.getExternalStorageDirectory(),
+
+
+        storeForder = new File(getExtSDCardPath(),
                 "ksyun_download");
         if (!storeForder.exists()) {
             storeForder.mkdirs();
         } else if (storeForder.isFile()) {
             storeForder.delete();
         }
+    }
+
+    /**
+     * 获取外置SD卡路径以及TF卡的路径
+     * <p>
+     * 返回的数据：paths.get(0)肯定是外置SD卡的位置，因为它是primary external storage.
+     *
+     * @return 所有可用于存储的不同的卡的位置，用一个List来保存
+     */
+    public static String getExtSDCardPath() {
+        List<String> paths = new ArrayList<String>();
+        String extFileStatus = Environment.getExternalStorageState();
+        File extFile = Environment.getExternalStorageDirectory();
+        //首先判断一下外置SD卡的状态，处于挂载状态才能获取的到
+        if (extFileStatus.equals(Environment.MEDIA_MOUNTED)
+                && extFile.exists() && extFile.isDirectory()
+                && extFile.canWrite()) {
+            //外置SD卡的路径
+            paths.add(extFile.getAbsolutePath());
+        }
+        try {
+            // obtain executed result of command line code of 'mount', to judge
+            // whether tfCard exists by the result
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec("mount");
+            InputStream is = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line = null;
+            int mountPathIndex = 1;
+            while ((line = br.readLine()) != null) {
+                // format of sdcard file system: vfat/fuse
+//                Log.i("KSYun",line);
+                if ((!line.contains("fat") && !line.contains("fuse") && !line
+                        .contains("storage")&& !line.contains("mnt"))
+                        || line.contains("secure")
+                        || line.contains("asec")
+                        || line.contains("firmware")
+                        || line.contains("shell")
+                        || line.contains("obb")
+                        || line.contains("legacy") ) {
+                    continue;
+                }
+                String[] parts = line.split(" ");
+                int length = parts.length;
+                if (mountPathIndex >= length) {
+                    continue;
+                }
+                String mountPath = parts[mountPathIndex];
+                if (!mountPath.contains("/") || mountPath.contains("data")
+                        || mountPath.contains("Data")) {
+                    continue;
+                }
+                File mountRoot = new File(mountPath);
+                if (!mountRoot.exists() || !mountRoot.isDirectory()
+                        || !mountRoot.canWrite()) {
+                    continue;
+                }
+                boolean equalsToPrimarySD = mountPath.equals(extFile
+                        .getAbsolutePath());
+                if (equalsToPrimarySD) {
+                    continue;
+                }
+                //扩展存储卡即TF卡或者SD卡路径
+                paths.add(mountPath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //获取最大容量的sd卡路径
+        long size = 0;
+        String path = "";
+
+        for (int i=0;i<paths.size();i++) {
+
+            if (getFreeBytes(paths.get(i))/(1024*1024)>size){
+                size = getFreeBytes(paths.get(i))/(1024*1024);
+                path = paths.get(i);
+            }
+
+            Log.i("KSYun", paths.get(i)+"="+getFreeBytes(paths.get(i))/(1024*1024));
+        }
+        return path;
+    }
+
+
+    /**
+     * 获取指定路径所在空间的剩余可用容量字节数，单位byte
+     *
+     * @param filePath
+     * @return 容量字节 SDCard可用空间，内部存储可用空间
+     */
+    public static long getFreeBytes(String filePath) {
+
+        StatFs stat = new StatFs(filePath);
+        long availableBlocks = (long) stat.getAvailableBlocks() - 4;
+        return stat.getBlockSize() * availableBlocks;
+        // int freeRoot = (int) (SDCardUtils.getFreeBytes(sdpath) / (1024 * 1024)); ---> 获取的是M为单位
     }
 }

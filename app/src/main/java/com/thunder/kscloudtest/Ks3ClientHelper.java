@@ -4,23 +4,37 @@ import java.io.File;
 import java.io.IOException;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.ksyun.ks3.exception.Ks3Error;
+import com.ksyun.ks3.model.PartETag;
 import com.ksyun.ks3.model.acl.CannedAccessControlList;
+import com.ksyun.ks3.model.result.CompleteMultipartUploadResult;
 import com.ksyun.ks3.model.result.GetObjectResult;
+import com.ksyun.ks3.model.result.InitiateMultipartUploadResult;
+import com.ksyun.ks3.model.result.ListPartsResult;
 import com.ksyun.ks3.services.Ks3Client;
 import com.ksyun.ks3.services.Ks3ClientConfiguration;
+import com.ksyun.ks3.services.handler.CompleteMultipartUploadResponseHandler;
 import com.ksyun.ks3.services.handler.CreateBucketResponceHandler;
 import com.ksyun.ks3.services.handler.DeleteBucketResponceHandler;
 import com.ksyun.ks3.services.handler.DeleteObjectRequestHandler;
 import com.ksyun.ks3.services.handler.GetObjectResponseHandler;
+import com.ksyun.ks3.services.handler.InitiateMultipartUploadResponceHandler;
+import com.ksyun.ks3.services.handler.ListPartsResponseHandler;
 import com.ksyun.ks3.services.handler.PutObjectResponseHandler;
-import com.ksyun.ks3.services.request.Ks3HttpRequest;
+import com.ksyun.ks3.services.handler.UploadPartResponceHandler;
+import com.ksyun.ks3.services.request.CompleteMultipartUploadRequest;
+import com.ksyun.ks3.services.request.InitiateMultipartUploadRequest;
 import com.ksyun.ks3.services.request.PutObjectRequest;
+import com.ksyun.ks3.services.request.UploadPartRequest;
 
 import org.apache.http.Header;
+
+import static com.thunder.kscloudtest.Ks3ClientHelper.client;
 
 
 public class Ks3ClientHelper {
@@ -29,6 +43,7 @@ public class Ks3ClientHelper {
 
 	private static Ks3ClientConfiguration configuration;
 	private static Context _context;
+	public UploadPartHandler handler;
 
 	//初始化
 	public static void Init(Context context) {
@@ -97,6 +112,54 @@ public class Ks3ClientHelper {
 					}
 				});
 	}
+
+//	// 分快上传
+//	private void doMultipartUpload(final String bucketName,
+//								   final UploadFile item) {
+//
+//		handler = new UploadPartHandler();
+//		client.initiateMultipartUpload(new InitiateMultipartUploadRequest(
+//						bucketName, objectKey),
+//				new InitiateMultipartUploadResponceHandler() {
+//
+//					@Override
+//					public void onFailure(int i, Ks3Error ks3Error, Header[] headers, String s, Throwable throwable) {
+//
+//					}
+//
+//					@Override
+//					public void onSuccess(int statesCode,
+//										  Header[] responceHeaders,
+//										  InitiateMultipartUploadResult result) {
+//						String uploadId = result.getUploadId();
+//						handler.sendEmptyMessage(1);
+//
+//
+//					}
+//				});
+//		}
+
+
+	class UploadPartHandler extends Handler{
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+
+			switch (msg.what){
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case -1:
+					break;
+			}
+
+		}
+	}
+
 
 	//下载文件
 	public static void downloadObj(String bucketName, String objectKey,
@@ -217,3 +280,4 @@ public class Ks3ClientHelper {
 
 
 }
+

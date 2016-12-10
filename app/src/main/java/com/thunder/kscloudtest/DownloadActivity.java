@@ -8,30 +8,20 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.apache.http.Header;
-import org.apache.http.HttpConnection;
 
 import com.ksyun.ks3.exception.Ks3Error;
-import com.ksyun.ks3.model.Ks3Object;
 import com.ksyun.ks3.model.result.GetObjectResult;
 import com.ksyun.ks3.services.Ks3Client;
 import com.ksyun.ks3.services.Ks3ClientConfiguration;
-import com.ksyun.ks3.services.request.GetObjectRequest;
 import com.ksyun.ks3.services.handler.GetObjectResponseHandler;
-import com.ksyun.ks3.services.request.Ks3HttpRequest;
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 

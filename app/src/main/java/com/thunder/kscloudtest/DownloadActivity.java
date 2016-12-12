@@ -337,35 +337,35 @@ public class DownloadActivity extends AppCompatActivity {
 
     }
 
-
-    class MyHandler extends AsyncHttpResponseHandler {
-        //http请求成功，返回码为200，系统回调此方法
-        @Override
-        //responseBody的内容就是服务器返回的数据
-        public void onSuccess(int statusCode, Header[] headers,byte[] responseBody) {
-
-
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(file);
-                fos.write(responseBody);
-
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers,byte[] responseBody, Throwable error) {
-            Log.i("=====","==========");
-            error.printStackTrace();
-            Toast.makeText(DownloadActivity.this, "ERROR", Toast.LENGTH_LONG).show();
-            Log.i("=====","==========");
-
-        }
-    }
+//
+//    class MyHandler extends AsyncHttpResponseHandler {
+//        //http请求成功，返回码为200，系统回调此方法
+//        @Override
+//        //responseBody的内容就是服务器返回的数据
+//        public void onSuccess(int statusCode, Header[] headers,byte[] responseBody) {
+//
+//
+//            FileOutputStream fos = null;
+//            try {
+//                fos = new FileOutputStream(file);
+//                fos.write(responseBody);
+//
+//                fos.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//
+//        @Override
+//        public void onFailure(int statusCode, Header[] headers,byte[] responseBody, Throwable error) {
+//            Log.i("=====","==========");
+//            error.printStackTrace();
+//            Toast.makeText(DownloadActivity.this, "ERROR", Toast.LENGTH_LONG).show();
+//            Log.i("=====","==========");
+//
+//        }
+//    }
     private void prepareStoreForder() {
 
 

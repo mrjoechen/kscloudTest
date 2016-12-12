@@ -1,9 +1,6 @@
 package com.thunder.kscloudtest;
 
-import android.content.Intent;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.os.StatFs;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -175,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
     public static long getFreeBytes(String filePath) {
 
         StatFs stat = new StatFs(filePath);
-        long availableBlocks = (long) stat.getAvailableBlocks() - 4;
+        long availableBlocks = (long) stat.getAvailableBlocks();
         return stat.getBlockSize() * availableBlocks;
         // int freeRoot = (int) (SDCardUtils.getFreeBytes(sdpath) / (1024 * 1024)); ---> 获取的是M为单位
     }

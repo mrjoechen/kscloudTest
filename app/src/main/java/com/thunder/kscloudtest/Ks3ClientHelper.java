@@ -73,6 +73,7 @@ public class Ks3ClientHelper {
 						// TODO Auto-generated method stub
 
 						Log.i("KSYun-Progress", arg0+"");
+//						Toast.makeText(_context, "Progress!", Toast.LENGTH_SHORT).show();
 
 					}
 
@@ -80,6 +81,7 @@ public class Ks3ClientHelper {
 					public void onTaskFailure(int i, Ks3Error ks3Error, Header[] headers, String s, Throwable throwable) {
 
 						Log.i("KSYun-Failure", i+"");
+						Toast.makeText(_context, "Failure!", Toast.LENGTH_SHORT).show();
 					}
 
 					@Override
@@ -109,6 +111,7 @@ public class Ks3ClientHelper {
 					public void onTaskCancel() {
 						// TODO Auto-generated method stub
 						Log.i("KSYun-Cancel", "Cancel");
+						Toast.makeText(_context, "Cancel!", Toast.LENGTH_SHORT).show();
 					}
 				});
 	}

@@ -315,6 +315,9 @@ public class DownloadActivity extends AppCompatActivity {
         );
 
 
+        /**
+         * 在平板和手机上需要获取URL自己实现下载，具体问题有待测试
+         */
 
 //        String url = result.getUrl();
 //        Log.i("KSYun-URL",url);

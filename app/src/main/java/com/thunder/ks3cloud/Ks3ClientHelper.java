@@ -1,6 +1,8 @@
 package com.thunder.ks3cloud;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -53,6 +55,15 @@ public class Ks3ClientHelper {
 
 	}
 
+
+	Handler mHandler = new Handler(){
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+
+		}
+	};
 
 	/**
 	 *

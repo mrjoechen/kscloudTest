@@ -18,6 +18,6 @@ public class Constants {
 	public static final String ACCESS_KEY_SECRET = "";
 	public static final String END_POINT = "ks3-cn-beijing.ksyun.com";
 
-	public static final String BUCKET_NAME = "lsandroid";
+	public static final String BUCKET_NAME = "";
 
 }
